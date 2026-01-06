@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- UserOrg and Orgs scripts ([#1](https://github.com/lazoliver/argentum/pull/3))
+
 - User Methods ([#1](https://github.com/lazoliver/argentum/pull/2))
 
 - Server Setup ([#1](https://github.com/lazoliver/argentum/pull/1))
