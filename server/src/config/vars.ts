@@ -5,6 +5,7 @@ interface EnvVariables {
   release_mode: string;
   logfile: string | null;
   database_url: string;
+  jwt_secret_key: string;
 }
 
 const dotenv = configDotenv();
@@ -17,11 +18,16 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is not defined");
 }
 
+if (!process.env.JWT_SECRET_KEY) {
+  throw new Error("JWT_SECRET_KEY environment variable is not defined");
+}
+
 const vars: EnvVariables = {
   api_port: process.env.API_PORT || "4001",
   release_mode: process.env.RELEASE_MODE || "dev",
   logfile: process.env.LOGFILE || null,
   database_url: process.env.DATABASE_URL,
+  jwt_secret_key: process.env.JWT_SECRET_KEY,
 };
 
 export default vars;

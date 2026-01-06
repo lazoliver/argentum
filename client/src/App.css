@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+:root {
+  --primary-color: #1f263e;
+}
+
+main {
+  height: 100vh;
+}
