@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  firstName String
+  lastName  String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userOrganizations UserOrganization[]
+  transactions      Transaction[] @relation("UserTransactions")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bankAccounts      BankAccount[]
+  costCenters       CostCenter[]
+  userOrganizations UserOrganization[]
+  transactions      Transaction[]
+
+  @@unique([name])
+}
+
+model UserOrganization {
+  id             String @id @default(uuid())
+  userId         String
+  organizationId String
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+}
+
+model CostCenter {
+  id        String   @id @default(uuid())
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  costs        Cost[]
+  transactions Transaction[]
+
+  @@unique([name, organizationId])
+}
+
+model Cost {
+  id           String   @id @default(uuid())
+  name         String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  costCenterId String
+  costCenter   CostCenter @relation(fields: [costCenterId], references: [id])
+
+  @@unique([name, costCenterId])
+}
+
+model BankAccount {
+  id            String @id @default(uuid())
+  accountName   String
+  accountNumber String
+  accountAgency String
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  transactions Transaction[]
+
+  @@unique([accountNumber, organizationId])
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(15, 2)
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  organizationId String
+  createdById    String
+  costCenterId   String
+  bankAccountId  String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy    User         @relation("UserTransactions", fields: [createdById], references: [id])
+  costCenter   CostCenter   @relation(fields: [costCenterId], references: [id])
+  bankAccount  BankAccount  @relation(fields: [bankAccountId], references: [id])
+}
