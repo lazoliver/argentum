@@ -31,7 +31,10 @@ export default function RegisterForm() {
       );
       const req = await register(validatedData);
 
-      localStorage.setItem("auth", req.token);
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({ token: req.token, isAuthenticated: true })
+      );
     } catch (error) {
       if (error instanceof ValidationError) {
         setErrors(error.errors);

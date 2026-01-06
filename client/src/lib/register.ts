@@ -15,7 +15,7 @@ export async function register(req: RegisterUserRequest) {
     const res = await axios.post(`${apiUrl}/users/register`, req);
     const data = res.data;
 
-    return { token: data.token };
+    return { token: data.token, organizations: data.userOrganizations };
   } catch (error) {
     if (error instanceof AxiosError) {
       throw new Error(error.message);

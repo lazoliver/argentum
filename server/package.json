@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --watch 'src/' --exec 'ts-node src/app.ts' -e ts"
+    "dev": "nodemon --watch 'src/' --exec 'ts-node src/app.ts' -e ts",
+    "create-org": "tsx ./src/scripts/organizations/createOrg.ts",
+    "create-user-org": "tsx ./src/scripts/userOrg/createUserOrg.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",

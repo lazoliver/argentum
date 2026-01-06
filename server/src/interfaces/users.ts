@@ -13,4 +13,9 @@ export interface LoginUserRequest {
 
 export interface UserResponse {
   token: string;
+  userOrganizations: Array<{
+    id: string;
+    userId: string;
+    organizationId: string;
+  }>;
 }

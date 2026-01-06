@@ -2,12 +2,17 @@ import { useState } from "react";
 import { ValidationError } from "yup";
 import { loginUserSchema } from "../validation/users";
 import { login } from "../lib/login";
+import { useNavigate } from "react-router-dom";
+import type { Organization } from "../interfaces/organizations";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [step, setStep] = useState(1);
+  const [organizations, setOrganizations] = useState<Array<Organization>>([]);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +30,13 @@ export default function LoginForm() {
       );
       const req = await login(validatedData);
 
-      localStorage.setItem("auth", req.token);
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({ token: req.token, isAuthenticated: false })
+      );
+
+      setOrganizations(req.organizations);
+      setStep(2);
     } catch (error) {
       if (error instanceof ValidationError) {
         setErrors(error.errors);
@@ -43,45 +54,83 @@ export default function LoginForm() {
     }
   };
 
+  const handleMainOrgSubmit = ({ id, name }: { id: string; name: string }) => {
+    const authRaw = localStorage.getItem("auth");
+
+    if (authRaw) {
+      const auth = JSON.parse(authRaw);
+
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({ ...auth, isAuthenticated: true })
+      );
+      localStorage.setItem("org", JSON.stringify({ id, name }));
+    }
+
+    navigate("/");
+  };
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-2 w-[300px] border rounded-sm p-4"
-    >
-      <div className="flex flex-col">
-        <input
-          className="border p-1 px-2"
-          id="email"
-          type="email"
-          value={email}
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div className="flex flex-col">
-        <input
-          className="border p-1 px-2"
-          id="password"
-          type="password"
-          value={password}
-          placeholder="Senha"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button
-        className="border p-2 rounded-sm w-full"
-        type="submit"
-        disabled={isLoading}
-      >
-        Login
-      </button>
-      {errors.length > 0 && (
+    <>
+      {step === 1 && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-2 w-[300px] border rounded-sm p-4"
+        >
+          <div className="flex flex-col">
+            <input
+              className="border p-1 px-2"
+              id="email"
+              type="email"
+              value={email}
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col">
+            <input
+              className="border p-1 px-2"
+              id="password"
+              type="password"
+              value={password}
+              placeholder="Senha"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            className="border p-2 rounded-sm w-full"
+            type="submit"
+            disabled={isLoading}
+          >
+            Login
+          </button>
+          {errors.length > 0 && (
+            <ul>
+              {errors.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          )}
+        </form>
+      )}
+      {step === 2 && (
         <ul>
-          {errors.map((message, index) => (
-            <li key={index}>{message}</li>
-          ))}
+          {organizations &&
+            organizations.map((org) => (
+              <button
+                onClick={() =>
+                  handleMainOrgSubmit({
+                    id: org.organization.id,
+                    name: org.organization.name,
+                  })
+                }
+                key={org.organization.id}
+              >
+                {org.organization.name}
+              </button>
+            ))}
         </ul>
       )}
-    </form>
+    </>
   );
 }
