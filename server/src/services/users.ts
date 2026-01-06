@@ -25,6 +25,11 @@ const UsersService = {
         lastName: userData.lastName.toLowerCase(),
         password: hashedPassword,
       },
+      include: {
+        userOrganizations: {
+          include: { organization: true },
+        },
+      },
     });
 
     const token = jwt.sign(
@@ -34,12 +39,18 @@ const UsersService = {
 
     return {
       token,
+      userOrganizations: user.userOrganizations,
     };
   },
   async login(userData: LoginUserRequest): Promise<UserResponse> {
     const userExists = await prisma.user.findUnique({
       where: {
         email: userData.email.toLowerCase(),
+      },
+      include: {
+        userOrganizations: {
+          include: { organization: true },
+        },
       },
     });
 
@@ -59,6 +70,7 @@ const UsersService = {
 
     return {
       token,
+      userOrganizations: userExists.userOrganizations,
     };
   },
 };

@@ -3,41 +3,60 @@ import vars from "./vars";
 
 const { release_mode, logfile } = vars;
 
-function releaseMode(release_mode: string) {
+function releaseMode(release_mode: string): string {
   switch (release_mode) {
     case "dev":
       return "debug";
     case "prod":
       return "error";
+    default:
+      return "info";
   }
 }
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
-const myFormat = printf(({ level, message, timestamp }) => {
+const logFormat = printf(({ level, message, timestamp }) => {
   return `[${timestamp as string}] ${level}: ${message as string}`;
 });
 
-const transports: winston.transport[] = [new winston.transports.Console()];
+const consoleFormat = combine(
+  timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+  winston.format((info) => {
+    info.level = info.level.toUpperCase();
+    return info;
+  })(),
+  colorize({ level: true }),
+  logFormat
+);
+
+const fileFormat = combine(
+  timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+  winston.format((info) => {
+    info.level = info.level.toUpperCase();
+    return info;
+  })(),
+  logFormat
+);
+
+const transports: winston.transport[] = [
+  new winston.transports.Console({
+    format: consoleFormat,
+  }),
+];
 
 if (logfile) {
-  transports.push(new winston.transports.File({ filename: logfile }));
+  transports.push(
+    new winston.transports.File({
+      filename: logfile,
+      format: fileFormat,
+    })
+  );
 }
 
-const loggerConfig = {
+const logger = winston.createLogger({
   level: releaseMode(release_mode),
-  format: combine(
-    winston.format((info) => ({
-      ...info,
-      level: info.level.toUpperCase(),
-    }))(),
-    colorize(),
-    timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    myFormat
-  ),
-  transports: transports,
-};
-
-const logger = winston.createLogger(loggerConfig);
+  transports,
+});
 
 export default logger;
