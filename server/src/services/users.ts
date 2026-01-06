@@ -2,15 +2,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
   CreateUserRequest,
-  CreateUserResponse,
   LoginUserRequest,
-  LoginUserResponse,
+  UserResponse,
 } from "../interfaces/users";
 import { prisma } from "./prisma";
 import vars from "../config/vars";
 
 const UsersService = {
-  async create(userData: CreateUserRequest): Promise<CreateUserResponse> {
+  async create(userData: CreateUserRequest): Promise<UserResponse> {
     const userExists = await prisma.user.findUnique({
       where: { email: userData.email },
     });
@@ -21,19 +20,26 @@ const UsersService = {
 
     const user = await prisma.user.create({
       data: {
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+        email: userData.email.toLowerCase(),
+        firstName: userData.firstName.toLowerCase(),
+        lastName: userData.lastName.toLowerCase(),
         password: hashedPassword,
       },
     });
 
-    return user;
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      vars.jwt_secret_key
+    );
+
+    return {
+      token,
+    };
   },
-  async login(userData: LoginUserRequest): Promise<LoginUserResponse> {
+  async login(userData: LoginUserRequest): Promise<UserResponse> {
     const userExists = await prisma.user.findUnique({
       where: {
-        email: userData.email,
+        email: userData.email.toLowerCase(),
       },
     });
 

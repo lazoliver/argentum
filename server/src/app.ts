@@ -9,7 +9,7 @@ function startServer() {
 
   app.use(cors());
   app.use(express.json());
-  app.use(router);
+  app.use("/api", router);
 
   app.listen(vars.api_port, () =>
     logger.debug(`start_server - http://localhost:${vars.api_port}`)

@@ -6,19 +6,11 @@ export interface CreateUserRequest {
   confirmPassword: string;
 }
 
-export interface CreateUserResponse {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-}
-
 export interface LoginUserRequest {
   email: string;
   password: string;
 }
 
-export interface LoginUserResponse {
+export interface UserResponse {
   token: string;
 }

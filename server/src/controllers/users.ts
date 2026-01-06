@@ -14,7 +14,7 @@ const UsersController = {
       const user = await UsersService.create(validatedData);
 
       logger.info(
-        `users_controller/create - user successfully created with email: ${user.email}`
+        `users_controller/create - user successfully created with email: ${validatedData.email}`
       );
       return res.status(201).json(user);
     } catch (error) {
