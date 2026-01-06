@@ -15,3 +15,10 @@ export const createUserSchema = object({
     .required("Confirmação de senha é obrigatória")
     .oneOf([ref("password")], "As senhas não conferem"),
 });
+
+export const loginUserSchema = object({
+  email: string().email("Email inválido").required("Email é obrigatório"),
+  password: string()
+    .required("Senha é obrigatória")
+    .min(8, "A senha deve ter no mínimo 8 caracteres"),
+});

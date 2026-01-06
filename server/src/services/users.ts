@@ -1,6 +1,13 @@
 import bcrypt from "bcryptjs";
-import { CreateUserRequest, CreateUserResponse } from "../interfaces/users";
+import jwt from "jsonwebtoken";
+import {
+  CreateUserRequest,
+  CreateUserResponse,
+  LoginUserRequest,
+  LoginUserResponse,
+} from "../interfaces/users";
 import { prisma } from "./prisma";
+import vars from "../config/vars";
 
 const UsersService = {
   async create(userData: CreateUserRequest): Promise<CreateUserResponse> {
@@ -22,6 +29,31 @@ const UsersService = {
     });
 
     return user;
+  },
+  async login(userData: LoginUserRequest): Promise<LoginUserResponse> {
+    const userExists = await prisma.user.findUnique({
+      where: {
+        email: userData.email,
+      },
+    });
+
+    if (!userExists) throw new Error("Usuário não cadastrado.");
+
+    const matchPassword = await bcrypt.compare(
+      userData.password,
+      userExists.password
+    );
+
+    if (!matchPassword) throw new Error("Credenciais não coincidem.");
+
+    const token = jwt.sign(
+      { id: userExists.id, email: userExists.email },
+      vars.jwt_secret_key
+    );
+
+    return {
+      token,
+    };
   },
 };
 

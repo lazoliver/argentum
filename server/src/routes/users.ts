@@ -7,5 +7,9 @@ router.post(
   "/register",
   async (req: Request, res: Response) => await UsersController.create(req, res)
 );
+router.post(
+  "/login",
+  async (req: Request, res: Response) => await UsersController.login(req, res)
+);
 
 export default router;
